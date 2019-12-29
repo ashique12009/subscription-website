@@ -7,6 +7,7 @@ use App\Http\Requests;
 use App\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use DB;
 
 class UserController extends Controller
 {
@@ -37,6 +38,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::get()->pluck('name', 'name');
+        $thisUserRoles = [];
         return view('admin.user.create', compact('roles'));
     }
 
@@ -67,7 +69,6 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-
         return view('admin.user.show', compact('user'));
     }
 
@@ -81,7 +82,14 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.user.edit', compact('user'));
+        $roles = Role::get()->pluck('name', 'name');
+        $thisUserRoles = DB::table('users')
+            ->select('roles.name as role_name')
+            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->leftJoin('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('users.id', '=', $id)
+            ->get();
+        return view('admin.user.edit', compact('user', 'roles', 'thisUserRoles'));
     }
 
     /**
@@ -95,10 +103,10 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         
-        $requestData = $request->all();
-        
+        $requestData = $request->all();        
         $user = User::findOrFail($id);
         $user->update($requestData);
+        $user->syncRoles($request->roles);
 
         return redirect('admin/user')->with('flash_message', 'User updated!');
     }

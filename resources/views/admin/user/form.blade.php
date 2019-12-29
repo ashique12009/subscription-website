@@ -15,10 +15,37 @@
 </div>
 <div class="form-group {{ $errors->has('role') ? 'has-error' : ''}}">
     <label for="role" class="control-label">{{ 'Role' }}</label>
-    <select name="roles[]" class="form-control" id="role" multiple="">
+    @if ( count($thisUserRoles) == 0 )
+        <select name="roles[]" multiple="true">
+            @foreach ( $roles as $role )              
+                <option value="{{ $role }}">{{ $role }}</option>
+           @endforeach
+        </select>
+    @else
+        <select name="roles[]" multiple="true" class="form-control">
+            @foreach ( $roles as $role )
+                @php $foundFlag = false; @endphp
+                @foreach ( $thisUserRoles as $thisUserRole )
+                    @if ( $role == $thisUserRole->role_name )
+                        @php 
+                            $foundFlag = true;
+                            break; 
+                        @endphp
+                    @endif
+                @endforeach
+                @if ( $foundFlag == true )
+                    <option value="{{ $role }}" selected>{{ $role }}</option>
+                @else 
+                    <option value="{{ $role }}">{{ $role }}</option>
+                @endif
+           @endforeach
+        </select>
+    @endif
+    
+    <!-- <select name="roles[]" class="form-control" id="role" multiple="">
     @foreach ($roles as $role)
         <option value="{{ $role }}">{{ $role }}</option>
-    @endforeach
+    @endforeach -->
 </select>
     {!! $errors->first('role', '<p class="help-block">:message</p>') !!}
 </div>
