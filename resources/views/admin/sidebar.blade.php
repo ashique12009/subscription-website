@@ -21,6 +21,11 @@
                         Permission
                     </a>
                 </li>
+                <li role="presentation">
+                    <a href="{{ url('/admin/user') }}">
+                        User
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
